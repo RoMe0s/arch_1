@@ -2,9 +2,9 @@
 
 namespace Game\Domain\Exception;
 
-use Game\Domain\Aggregates\Game\Game;
+use Game\Domain\Entity\Game;
 
-class GameHaveNotStartedYetException extends \Exception
+class GameHasNotStartedYetException extends \Exception
 {
     public function __construct(Game $game)
     {

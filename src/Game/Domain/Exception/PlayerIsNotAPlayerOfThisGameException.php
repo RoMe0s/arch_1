@@ -1,0 +1,16 @@
+<?php
+
+namespace Game\Domain\Exception;
+
+use Game\Domain\Entity\{
+    Player,
+    Game
+};
+
+class PlayerIsNotAPlayerOfThisGameException extends \Exception
+{
+    public function __construct(Game $game, Player $player)
+    {
+        parent::__construct("Player {$player->getId()} is not a player of the game - {$game->getId()}.");
+    }
+}

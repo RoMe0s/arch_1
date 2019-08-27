@@ -2,7 +2,7 @@
 
 namespace Game\Domain\Exception;
 
-use Game\Domain\Aggregates\Game\Game;
+use Game\Domain\Entity\Game;
 
 class GameAlreadyStartedException extends \Exception
 {

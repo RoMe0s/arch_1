@@ -1,23 +1,18 @@
 <?php
 
-namespace Game\Domain\Aggregates\Step;
+namespace Game\Domain\Entity;
 
-use Game\Domain\Aggregates\User\User;
-
-class Step
+final class Step
 {
     private $uuid;
-
-    private $user;
 
     private $x;
 
     private $y;
 
-    public function __construct(string $uuid, User $user, CoordinateX $x, CoordinateY $y)
+    public function __construct(string $uuid, CoordinateX $x, CoordinateY $y)
     {
         $this->uuid = $uuid;
-        $this->user = $user;
         $this->x = $x;
         $this->y = $y;
     }
@@ -25,11 +20,6 @@ class Step
     public function getId(): string
     {
         return $this->uuid;
-    }
-
-    public function getUser(): User
-    {
-        return $this->user;
     }
 
     public function getX(): CoordinateX

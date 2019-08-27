@@ -4,10 +4,10 @@ namespace Game\Domain\Exception;
 
 use Game\Domain\Entity\Game;
 
-class GameAlreadyEndedException extends \Exception
+class GameHasNotEndedYetException extends \Exception
 {
     public function __construct(Game $game)
     {
-        parent::__construct("Game {$game->getId()} has been already ended.");
+        parent::__construct("Game {$game->getId()} has not been ended yet.");
     }
 }

@@ -3,13 +3,13 @@
 namespace Game\Domain\Service;
 
 use Game\Domain\Exception\{
-    UserIsNotAPlayerOfThisGameException,
+    PlayerIsNotAPlayerOfThisGameException,
     GameAlreadyEndedException
 };
-use Game\Domain\Aggregates\{
-    Game\Game,
-    Step\Step,
-    User\User
+use Game\Domain\Entity\{
+    Player,
+    Game,
+    Step
 };
 
 final class MovementMakerService
@@ -21,11 +21,10 @@ final class MovementMakerService
         $this->checkIfSomeoneWinsService = $checkIfSomeoneWinsService;
     }
 
-    public function makeAMove(Game $game, Step $step): void
+    public function makeAMove(Player $player, Game $game, Step $step): void
     {
-        $player = $step->getUser();
-        if (!$this->ableToMakeAMove($game, $player)) {
-            throw new UserIsNotAPlayerOfThisGameException($game, $player);
+        if (!$game->playerIsParticipant($player)) {
+            throw new PlayerIsNotAPlayerOfThisGameException($game, $player);
         }
 
         if ($game->getEndedAt()) {
@@ -36,25 +35,13 @@ final class MovementMakerService
             $game->startGame();
         }
 
-        $game->addStep($step);
+        $game->incrementStepsCount();
+        $player->addStep($step);
 
         $this->checkIfSomeoneWinsService->checkWinner($game);
 
         if (!$game->getEndedAt() && count($game->getSteps()) === Game::MAX_COUNT_OF_STEPS) {
             $game->endGame();
         }
-    }
-
-    private function ableToMakeAMove(Game $game, User $player): bool
-    {
-        $playerId = $player->getId();
-        if ($game->getOwner()->getId() === $playerId) {
-            return true;
-        }
-        $competitor = $game->getCompetitor();
-        if ($competitor && $competitor->getId() === $playerId) {
-            return true;
-        }
-        return false;
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace Game\Domain\Aggregates\Step;
+namespace Game\Domain\Entity;
 
 use Game\Domain\Exception\WrongCoordinateYException;
 
-class CoordinateY
+final class CoordinateY
 {
     private const MIN_VALUE = 1;
 
