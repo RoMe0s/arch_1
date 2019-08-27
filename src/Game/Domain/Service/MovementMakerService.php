@@ -40,7 +40,7 @@ final class MovementMakerService
 
         $this->checkIfSomeoneWinsService->checkWinner($game);
 
-        if (!$game->getEndedAt() && count($game->getSteps()) === Game::MAX_COUNT_OF_STEPS) {
+        if (!$game->getEndedAt() && (count($game->getSteps()) === Game::MAX_COUNT_OF_STEPS || $game->getWinner())) {
             $game->endGame();
         }
     }
