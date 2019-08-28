@@ -52,7 +52,7 @@ final class Player
         return $this->uuid;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }

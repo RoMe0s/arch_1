@@ -2,28 +2,38 @@
 
 namespace Game\Infrastructure\Persistance\Eloquent;
 
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends BaseModel
+class User extends Authenticatable
 {
-    public $timestamps = false;
+    use Notifiable;
 
     protected $fillable = [
-        'id'
+        'id',
+        'name',
+        'email',
+        'password'
     ];
 
     protected $appends = [
         'steps',
-        'name'
+        'in_game_name'
     ];
 
-    public function getStepsAttribute(): Collection
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    public function getIncrementing()
     {
-        return $this->steps ?? collect();
+        return false;
     }
 
-    public function getNameAttribute()
+    public function getKeyType()
     {
-        return $this->name;
+        return 'string';
     }
 }

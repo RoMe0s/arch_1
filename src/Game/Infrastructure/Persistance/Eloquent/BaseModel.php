@@ -14,4 +14,5 @@ abstract class BaseModel extends Model
     public function getKeyType()
     {
         return 'string';
-    }}
+    }
+}

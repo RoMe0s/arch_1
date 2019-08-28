@@ -12,7 +12,7 @@ use Game\Domain\Exception\{
     GameHasNotStartedYetException,
     GameAlreadyHasWinnerException,
     PlayerIsNotAPlayerOfThisGameException,
-    GameHasNotEndedYetException
+    CompetitorIsMissedException
 };
 
 final class Game
@@ -33,6 +33,8 @@ final class Game
 
     private $stepsCount = 0;
 
+    private $lastStepId;
+
     private function __construct(
         string $uuid,
         Player $owner,
@@ -40,8 +42,10 @@ final class Game
         int $winnerId = null,
         \DateTime $startedAt = null,
         \DateTime $endedAt = null,
-        int $stepsCount = 0
-    ) {
+        int $stepsCount = 0,
+        string $lastStepId = null
+    )
+    {
         $this->uuid = $uuid;
         $this->owner = $owner;
         $this->competitor = $competitor;
@@ -49,6 +53,7 @@ final class Game
         $this->startedAt = $startedAt;
         $this->endedAt = $endedAt;
         $this->stepsCount = $stepsCount;
+        $this->lastStepId = $lastStepId;
     }
 
     public static function createGame(string $uuid, Player $owner): Game
@@ -62,7 +67,7 @@ final class Game
             throw new GameAlreadyHasCompetitorException($this);
         }
 
-        if ($this->owner->getId() === $this->competitor->getId()) {
+        if ($this->owner->getId() === $competitor->getId()) {
             throw new CompetitorAndOwnerCannotBeEqualException($this);
         }
 
@@ -106,11 +111,7 @@ final class Game
 
     public function setWinner(Player $player): void
     {
-        if (!$this->endedAt) {
-            throw new GameHasNotEndedYetException($this);
-        }
-
-        if ($this->winner) {
+        if ($this->winnerId) {
             throw new GameAlreadyHasWinnerException($this);
         }
 
@@ -125,12 +126,27 @@ final class Game
     public function playerIsParticipant(Player $player): bool
     {
         $playerId = $player->getId();
-        if ($this->getOwner()->getId() === $playerId) {
+        if ($this->owner->getId() === $playerId) {
             return true;
         }
 
-        $competitor = $this->getCompetitor();
+        $competitor = $this->competitor;
         return $competitor && $competitor->getId() === $playerId;
+    }
+
+    public function playerIsAbleToMakeAMove(Player $player): bool
+    {
+        if (!$this->competitor) {
+            throw new CompetitorIsMissedException($this);
+        }
+
+        if (!$this->lastStepId) {
+            return true;
+        }
+
+        return !array_filter($player->getSteps(), function (Step $step) {
+            return $step->getId() === $this->lastStepId;
+        });
     }
 
     public function getPlayerOfGame(Player $player): ?Player
@@ -144,6 +160,19 @@ final class Game
         }
 
         return $this->competitor;
+    }
+
+    public function getAnotherPlayer(Player $player): ?Player
+    {
+        if (!$this->playerIsParticipant($player)) {
+            throw new PlayerIsNotAPlayerOfThisGameException($this, $player);
+        }
+
+        if ($this->playerIsTheOwner($player)) {
+            return $this->competitor;
+        }
+
+        return $this->owner;
     }
 
     public function getId(): string
@@ -163,12 +192,16 @@ final class Game
 
     public function getWinner(): ?Player
     {
-        $owner = $this->getOwner();
+        $owner = $this->owner;
         if ($this->winnerId === $owner->getId()) {
             return $owner;
         }
 
-        return $this->getCompetitor();
+        $competitor = $this->competitor;
+        if ($competitor && $this->winnerId === $competitor->getId()) {
+            return $competitor;
+        }
+        return null;
     }
 
     public function getStartedAt(): ?\DateTime

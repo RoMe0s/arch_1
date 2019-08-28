@@ -37,6 +37,6 @@ class NewStepDTO
 
     public function getY(): int
     {
-        return $thix->y;
+        return $this->y;
     }
 }

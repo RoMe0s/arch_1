@@ -2,12 +2,10 @@
 
 namespace Game\Domain\Exception;
 
-use Game\Domain\Entity\Player;
-
 class PlayerNotFoundException extends \Exception
 {
-    public function __construct(Player $player)
+    public function __construct(string $playerId)
     {
-        parent::__construct("Player {$player->getId()} not found exception.");
+        parent::__construct("Player $playerId not found exception.");
     }
 }

@@ -33,14 +33,24 @@ class GameRepository implements GameRepositoryInterface
         $startedAt = $game->getStartedAt();
         $endedAt = $game->getEndedAt();
 
+        dump([
+            'owner_id' => $owner->getId(),
+            'owner_name' => $owner->getName(),
+            'competitor_id' => $competitor ? $competitor->getId() : null,
+            'competitor_name' => $competitor ? $competitor->getName() : null,
+            'winner_id' => $winner ? $winner->getId() : null,
+            'started_at' => $startedAt,
+            'ended_at' => $endedAt
+        ]);
+
         EloquentGame::updateOrCreate(['id' => $game->getId()], [
             'owner_id' => $owner->getId(),
             'owner_name' => $owner->getName(),
             'competitor_id' => $competitor ? $competitor->getId() : null,
             'competitor_name' => $competitor ? $competitor->getName() : null,
             'winner_id' => $winner ? $winner->getId() : null,
-            'started_at' => $startedAt ? $startedAt->format('Y-m-d H:i:s') : null,
-            'ended_at' => $endedAt ? $endedAt->format('Y-m-d H:i:s') : null
+            'started_at' => $startedAt,
+            'ended_at' => $endedAt
         ]);
     }
 }

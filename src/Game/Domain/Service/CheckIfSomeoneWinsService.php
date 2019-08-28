@@ -14,8 +14,7 @@ final class CheckIfSomeoneWinsService
 
     public function checkWinner(Game $game): void
     {
-        $steps = $game->getSteps();
-        if (count($steps) >= self::NEEDED_COUNT_OF_STEPS) {
+        if ($game->getStepsCount() >= self::NEEDED_COUNT_OF_STEPS) {
             $matrix = $this->getDefaultMatrix();
             foreach ($game->getOwner()->getSteps() as $step) {
                 $matrix[$step->getX()->getValue()][$step->getY()->getValue()] = self::OWNER_MARK;

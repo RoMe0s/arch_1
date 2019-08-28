@@ -2,7 +2,9 @@
 
 namespace Game\Domain\Service;
 
-use Game\Domain\Exception\GameAlreadyEndedException;
+use Game\Domain\Exception\{GameAlreadyEndedException,
+    PlayerIsNotAbleToMakeAMoveException
+};
 use Game\Domain\Entity\{
     Player,
     Game,
@@ -24,6 +26,10 @@ final class MovementMakerService
             throw new GameAlreadyEndedException($game);
         }
 
+        if (!$game->playerIsAbleToMakeAMove($player)) {
+            throw new PlayerIsNotAbleToMakeAMoveException($player, $game);
+        }
+
         if (!$game->getStartedAt()) {
             $game->startGame();
         }
@@ -33,7 +39,7 @@ final class MovementMakerService
 
         $this->checkIfSomeoneWinsService->checkWinner($game);
 
-        if (!$game->getEndedAt() && (count($game->getSteps()) === Game::MAX_COUNT_OF_STEPS || $game->getWinner())) {
+        if (!$game->getEndedAt() && ($game->getStepsCount() === Game::MAX_COUNT_OF_STEPS || $game->getWinner())) {
             $game->endGame();
         }
     }

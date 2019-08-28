@@ -21,15 +21,15 @@ class PlayerMapper
     {
         $player = Player::createNew($eloquentUser->id);
 
-        $playerReflection = new \ReflectionClass($player);
+        $playerReflection = new \ReflectionClass(Player::class);
 
-        if ($eloquentName = $eloquentUser->name) {
+        if ($eloquentName = $eloquentUser->in_game_name) {
             $namePropertyReflection = $playerReflection->getProperty('name');
             $namePropertyReflection->setAccessible(true);
             $namePropertyReflection->setValue($player, $eloquentName);
         }
 
-        if (count($eloquentUser->steps)) {
+        if ($eloquentUser->steps && count($eloquentUser->steps)) {
             $steps = $eloquentUser->steps->map(
                 function (EloquentStep $eloquentStep) {
                     return $this->stepMapper->make($eloquentStep);

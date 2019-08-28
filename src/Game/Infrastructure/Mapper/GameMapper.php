@@ -20,30 +20,30 @@ class GameMapper
     public function make(EloquentGame $eloquentGame): Game
     {
         $eloquentOwner = $eloquentGame->owner;
-        $eloquentSteps = $eloquentGame->steps->map(
+        $eloquentSteps = $eloquentGame->steps->filter(
             function (EloquentStep $eloquentStep) use ($eloquentOwner) {
                 return $eloquentStep->user_id === $eloquentOwner->id;
             }
         );
         $eloquentOwner->setAttribute('steps', $eloquentSteps);
         if ($eloquentGame->owner_name) {
-            $eloquentOwner->setAttribute('name', $eloquentGame->owner_name);
+            $eloquentOwner->setAttribute('in_game_name', $eloquentGame->owner_name);
         }
         $owner = $this->playerMapper->make($eloquentOwner);
 
         $game = Game::createGame($eloquentGame->id, $owner);
 
-        $gameReflection = new \ReflectionClass($game);
+        $gameReflection = new \ReflectionClass(Game::class);
 
         if ($eloquentCompetitor = $eloquentGame->competitor) {
-            $eloquentSteps = $eloquentGame->steps->map(
+            $eloquentSteps = $eloquentGame->steps->filter(
                 function (EloquentStep $eloquentStep) use ($eloquentCompetitor) {
                     return $eloquentStep->user_id === $eloquentCompetitor->id;
                 }
             );
             $eloquentCompetitor->setAttribute('steps', $eloquentSteps);
             if ($eloquentGame->competitor_name) {
-                $eloquentCompetitor->setAttribute('name', $eloquentGame->competitor_name);
+                $eloquentCompetitor->setAttribute('in_game_name', $eloquentGame->competitor_name);
             }
             $competitor = $this->playerMapper->make($eloquentCompetitor);
 
@@ -74,6 +74,10 @@ class GameMapper
             $stepsCountPropertyReflection = $gameReflection->getProperty('stepsCount');
             $stepsCountPropertyReflection->setAccessible(true);
             $stepsCountPropertyReflection->setValue($game, count($eloquentGame->steps));
+
+            $lastStepIdPropertyReflection = $gameReflection->getProperty('lastStepId');
+            $lastStepIdPropertyReflection->setAccessible(true);
+            $lastStepIdPropertyReflection->setValue($game, $eloquentGame->steps->last()->id);
         }
 
         return $game;

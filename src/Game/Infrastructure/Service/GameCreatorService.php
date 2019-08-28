@@ -26,7 +26,7 @@ class GameCreatorService
     {
         $player = $this->playerRepository->findById($playerId);
         if (!$player) {
-            throw new PlayerNotFoundException($player);
+            throw new PlayerNotFoundException($playerId);
         }
 
         $game = Game::createGame(Str::uuid(), $player);

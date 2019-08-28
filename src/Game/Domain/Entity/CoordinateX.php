@@ -6,9 +6,9 @@ use Game\Domain\Exception\WrongCoordinateXException;
 
 final class CoordinateX
 {
-    private const MIN_VALUE = 1;
+    private const MIN_VALUE = 0;
 
-    private const MAX_VALUE = 3;
+    private const MAX_VALUE = 2;
 
     private $value;
 

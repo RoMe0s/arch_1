@@ -6,9 +6,9 @@ use Game\Domain\Exception\WrongCoordinateYException;
 
 final class CoordinateY
 {
-    private const MIN_VALUE = 1;
+    private const MIN_VALUE = 0;
 
-    private const MAX_VALUE = 3;
+    private const MAX_VALUE = 2;
 
     private $value;
 
