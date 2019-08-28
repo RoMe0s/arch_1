@@ -106,12 +106,8 @@ final class Game
 
     public function setWinner(Player $player): void
     {
-        if (!$this->competitor || !$this->endedAt) {
+        if (!$this->endedAt) {
             throw new GameHasNotEndedYetException($this);
-        }
-
-        if (!$this->playerIsParticipant($player)) {
-            throw new PlayerIsNotAPlayerOfThisGameException($this, $player);
         }
 
         if ($this->winner) {
@@ -139,7 +135,7 @@ final class Game
 
     public function getPlayerOfGame(Player $player): ?Player
     {
-        if (!$this->playerIsParticipant()) {
+        if (!$this->playerIsParticipant($player)) {
             throw new PlayerIsNotAPlayerOfThisGameException($this, $player);
         }
 

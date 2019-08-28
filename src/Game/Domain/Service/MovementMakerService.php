@@ -2,10 +2,7 @@
 
 namespace Game\Domain\Service;
 
-use Game\Domain\Exception\{
-    PlayerIsNotAPlayerOfThisGameException,
-    GameAlreadyEndedException
-};
+use Game\Domain\Exception\GameAlreadyEndedException;
 use Game\Domain\Entity\{
     Player,
     Game,
@@ -23,10 +20,6 @@ final class MovementMakerService
 
     public function makeAMove(Player $player, Game $game, Step $step): void
     {
-        if (!$game->playerIsParticipant($player)) {
-            throw new PlayerIsNotAPlayerOfThisGameException($game, $player);
-        }
-
         if ($game->getEndedAt()) {
             throw new GameAlreadyEndedException($game);
         }
