@@ -3,7 +3,7 @@
         <div class="row justify-content-center">
             <div class="col-md-10">
                 <div class="card">
-                    <div class="card-body">
+                    <div class="card-body" v-if="loaded">
                         <div class="row">
                             <div class="col-md-6">
                                 <h2>You:</h2>
@@ -52,15 +52,22 @@
                             <br>
                             <div class="row" v-for="x in 3">
                                 <div class="col-md-4" v-for="y in 3" style="margin-bottom: 25px">
-                                    <button class="btn btn-block btn-primary" style="height: 273px; font-size: 100px" v-if="hasMark(x - 1, y -1)">
+                                    <button class="btn btn-block btn-primary" style="height: 273px; font-size: 100px"
+                                            v-if="hasMark(x - 1, y -1)" :disabled="game.winner">
                                         {{ getMarkLabel(x - 1, y - 1) }}
                                     </button>
-                                    <button class="btn btn-block btn-info" style="height: 273px; font-size: 100px" v-else @click="makeAMove(x - 1, y - 1)">
+                                    <button class="btn btn-block btn-info" style="height: 273px; font-size: 100px"
+                                            v-else @click="makeAMove(x - 1, y - 1)" :disabled="game.winner">
                                     </button>
                                 </div>
                                 <br>
                             </div>
                         </div>
+                    </div>
+                    <div class="card-body" v-else>
+                        <h1 class="text-center">
+                            Loading...
+                        </h1>
                     </div>
                 </div>
             </div>
@@ -69,69 +76,72 @@
 </template>
 
 <script>
-  export default {
-    props: {
-      id: {
-        type: String,
-        required: true
-      }
-    },
-    data() {
-      return {
-        game: {
-          owner: null,
-          competitor: null,
-          winner: null,
-          startedAt: null,
-          endedAt: null,
-          stepsCount: null
+    export default {
+        props: {
+            id: {
+                type: String,
+                required: true
+            }
         },
-        player: {
-          name: null,
-          steps: []
+        data() {
+            return {
+                game: {
+                    owner: null,
+                    competitor: null,
+                    winner: null,
+                    startedAt: null,
+                    endedAt: null,
+                    stepsCount: null
+                },
+                player: {
+                    name: null,
+                    steps: []
+                },
+                competitor: {
+                    name: null,
+                    steps: []
+                },
+                playerName: null,
+                loaded: false
+            };
         },
-        competitor: {
-          name: null,
-          steps: []
+        methods: {
+            saveName() {
+                axios.post(
+                    `/api/game/${this.id}/set-name`,
+                    {name: this.playerName}
+                ).catch(console.log)
+            },
+            hasMark(x, y) {
+                const playerStepIndex = this.player.steps.findIndex(step => step.x == x && step.y == y);
+                if (playerStepIndex >= 0) {
+                    return true;
+                }
+                return this.competitor.steps.findIndex(step => step.x == x && step.y == y) >= 0;
+            },
+            getMarkLabel(x, y) {
+                if (this.player.steps.findIndex(step => step.x == x && step.y == y) >= 0) {
+                    return 'X';
+                }
+                return '0';
+            },
+            makeAMove(x, y) {
+                axios.post(
+                    `/api/game/${this.id}/move`,
+                    {x, y}
+                ).catch(console.log)
+            }
         },
-        playerName: null
-      };
-    },
-    methods: {
-      saveName() {
-        axios.post(`/api/game/${this.id}/set-name`, {
-          name: this.playerName
-        })
-          .then(() => window.location.reload())
-          .catch(console.log)
-      },
-      hasMark(x, y) {
-        const playerStepIndex = this.player.steps.findIndex(step => step.x == x && step.y == y);
-        if (playerStepIndex >= 0) {
-          return true;
+        created() {
+            setInterval(() => axios.get(`/api/game/${this.id}`)
+                    .then(response => {
+                        this.game = response.data.game;
+                        this.player = response.data.player;
+                        this.competitor = response.data.competitor;
+                        this.loaded = true;
+                    })
+                    .catch(console.log)
+                , 1000)
         }
-        return this.competitor.steps.findIndex(step => step.x == x && step.y == y) >= 0;
-      },
-      getMarkLabel(x, y) {
-        if (this.player.steps.findIndex(step => step.x == x && step.y == y) >= 0) {
-          return 'X';
-        }
-        return '0';
-      },
-      makeAMove(x, y) {
-        axios.post(`/api/game/${this.id}/move`, {x, y})
-          .then(() => window.location.reload())
-          .catch(console.log)
-      }
-    },
-    created() {
-      axios.get(`/api/game/${this.id}`)
-        .then(response => {
-          this.game = response.data.game;
-          this.player = response.data.player;
-          this.competitor = response.data.competitor;
-        })
-        .catch(console.log)
     }
-  }
 </script>

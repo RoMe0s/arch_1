@@ -48,6 +48,7 @@ class StepCreatorService
         if (!$game) {
             throw new GameNotFoundException($gameId);
         }
+
         $playerId = $newStepDTO->getPlayerId();
         $somePlayer = $this->playerRepository->findById($playerId);
         if (!$somePlayer) {

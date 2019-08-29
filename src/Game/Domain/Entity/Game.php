@@ -141,7 +141,7 @@ final class Game
         }
 
         if (!$this->lastStepId) {
-            return true;
+            return $this->playerIsTheOwner($player);
         }
 
         return !array_filter($player->getSteps(), function (Step $step) {
