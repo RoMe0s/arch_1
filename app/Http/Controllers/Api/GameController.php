@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\MakeAMoveRequest;
 use App\Http\Requests\SetPlayerNameRequest;
-use Game\Domain\Service\MovementMakerService;
 use Game\Infrastructure\DTO\NewStepDTO;
 use Game\Infrastructure\DTO\SetCompetitorDTO;
 use Game\Infrastructure\DTO\SetPlayerNameDTO;
