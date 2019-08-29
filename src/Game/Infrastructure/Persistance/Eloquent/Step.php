@@ -4,7 +4,7 @@ namespace Game\Infrastructure\Persistance\Eloquent;
 
 class Step extends BaseModel
 {
-    public $timestamps = false;
+    public const UPDATED_AT = null;
 
     protected $fillable = [
         'id',

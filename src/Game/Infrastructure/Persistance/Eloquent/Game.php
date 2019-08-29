@@ -34,6 +34,7 @@ class Game extends BaseModel
 
     public function steps()
     {
-        return $this->hasMany(Step::class);
+        return $this->hasMany(Step::class)
+            ->orderBy('created_at');
     }
 }

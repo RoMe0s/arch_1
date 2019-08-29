@@ -30,6 +30,7 @@ class CreateStepsTable extends Migration
             $table->unsignedTinyInteger('coordinate_y');
 
             $table->unique(['game_id', 'coordinate_x', 'coordinate_y']);
+            $table->timestamp('created_at');
         });
     }
 
