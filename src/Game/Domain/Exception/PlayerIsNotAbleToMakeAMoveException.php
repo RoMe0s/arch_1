@@ -7,7 +7,7 @@ use Game\Domain\Entity\{
     Player
 };
 
-class PlayerIsNotAbleToMakeAMoveException extends \Exception
+class PlayerIsNotAbleToMakeAMoveException extends \Exception implements DomainException
 {
     public function __construct(Player $player, Game $game)
     {

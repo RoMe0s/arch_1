@@ -2,7 +2,7 @@
 
 namespace Game\Domain\Exception;
 
-class WrongCoordinateYException extends \Exception
+class WrongCoordinateYException extends \Exception implements DomainException
 {
     public function __construct(int $coordinateYValue)
     {

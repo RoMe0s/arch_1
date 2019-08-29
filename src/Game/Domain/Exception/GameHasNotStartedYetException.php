@@ -4,7 +4,7 @@ namespace Game\Domain\Exception;
 
 use Game\Domain\Entity\Game;
 
-class GameHasNotStartedYetException extends \Exception
+class GameHasNotStartedYetException extends \Exception implements DomainException
 {
     public function __construct(Game $game)
     {

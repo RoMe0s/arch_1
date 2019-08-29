@@ -7,7 +7,7 @@ use Game\Domain\Entity\{
     Game
 };
 
-class PlayerNameAlreadySetException extends \Exception
+class PlayerNameAlreadySetException extends \Exception implements DomainException
 {
     public function __construct(Player $player, Game $game)
     {

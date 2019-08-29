@@ -4,7 +4,7 @@ namespace Game\Domain\Exception;
 
 use Game\Domain\Entity\Player;
 
-class PlayerIsFullOfStepsException extends \Exception
+class PlayerIsFullOfStepsException extends \Exception implements DomainException
 {
     public function __construct(Player $player)
     {

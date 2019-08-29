@@ -7,7 +7,7 @@ use Game\Domain\Entity\{
     Game
 };
 
-class PlayerIsNotAPlayerOfThisGameException extends \Exception
+class PlayerIsNotAPlayerOfThisGameException extends \Exception implements DomainException
 {
     public function __construct(Game $game, Player $player)
     {

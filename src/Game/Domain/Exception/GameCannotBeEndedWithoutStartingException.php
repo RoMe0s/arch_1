@@ -4,7 +4,7 @@ namespace Game\Domain\Exception;
 
 use Game\Domain\Entity\Game;
 
-class GameCannotBeEndedWithoutStartingException extends \Exception
+class GameCannotBeEndedWithoutStartingException extends \Exception implements DomainException
 {
     public function __construct(Game $game)
     {

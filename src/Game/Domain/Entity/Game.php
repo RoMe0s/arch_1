@@ -175,6 +175,27 @@ final class Game
         return $this->owner;
     }
 
+    public function isStepUnique(Step $step): bool
+    {
+        if (!$this->competitor) {
+            throw new CompetitorIsMissedException($this);
+        }
+
+        foreach ($this->owner->getSteps() as $ownerStep) {
+            if ($ownerStep->getId() === $step->getId()) {
+                return false;
+            }
+        }
+
+        foreach ($this->competitor->getSteps() as $competitorStep) {
+            if ($competitorStep->getId() === $step->getId()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public function getId(): string
     {
         return $this->uuid;
