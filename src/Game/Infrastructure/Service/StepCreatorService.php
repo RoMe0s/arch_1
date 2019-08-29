@@ -4,8 +4,7 @@ namespace Game\Infrastructure\Service;
 
 use Game\Domain\Exception\{
     GameNotFoundException,
-    PlayerNotFoundException,
-    StepIsNotUniqueException
+    PlayerNotFoundException
 };
 use Illuminate\Support\Facades\DB;
 use Game\Domain\Entity\{
@@ -63,9 +62,6 @@ class StepCreatorService
         $coordinateY = new CoordinateY($newStepDTO->getY());
 
         $newStep = new Step(Str::uuid(), $coordinateX, $coordinateY);
-        if (!$game->isStepUnique($newStep)) {
-            throw new StepIsNotUniqueException($game, $newStep);
-        }
 
         $this->movementMakerService->makeAMove($player, $game, $newStep);
 

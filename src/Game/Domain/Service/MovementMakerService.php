@@ -2,8 +2,10 @@
 
 namespace Game\Domain\Service;
 
-use Game\Domain\Exception\{GameAlreadyEndedException,
-    PlayerIsNotAbleToMakeAMoveException
+use Game\Domain\Exception\{
+    GameAlreadyEndedException,
+    PlayerIsNotAbleToMakeAMoveException,
+    StepIsNotUniqueException
 };
 use Game\Domain\Entity\{
     Player,
@@ -22,6 +24,10 @@ final class MovementMakerService
 
     public function makeAMove(Player $player, Game $game, Step $step): void
     {
+        if (!$game->isStepUnique($step)) {
+            throw new StepIsNotUniqueException($game, $step);
+        }
+
         if ($game->getEndedAt()) {
             throw new GameAlreadyEndedException($game);
         }
