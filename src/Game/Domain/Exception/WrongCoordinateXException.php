@@ -8,4 +8,9 @@ class WrongCoordinateXException extends \Exception implements DomainException
     {
         parent::__construct("Value($coordinateXValue) for coordinate x is out of range.");
     }
+
+    public function userMessage(): string
+    {
+        return 'Coordinate x is wrong.';
+    }
 }

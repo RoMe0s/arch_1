@@ -10,4 +10,9 @@ class GameAlreadyHasWinnerException extends \Exception implements DomainExceptio
     {
         parent::__construct("Game {$game->getId()} already has winner.");
     }
+
+    public function userMessage(): string
+    {
+        return 'Game already has winner.';
+    }
 }

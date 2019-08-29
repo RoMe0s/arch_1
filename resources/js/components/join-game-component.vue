@@ -15,10 +15,8 @@
     methods: {
       startNewGame() {
         axios.post(`/api/game/${this.id}/join`)
-          .then(response => {
-            window.location.href = `/game/${this.id}`;
-          })
-          .catch(console.log);
+          .then(() => window.location.href = `/game/${this.id}`)
+          .catch(this.handleException);
       }
     }
   }

@@ -10,6 +10,7 @@ class GameController extends Controller
 {
     public function show(EloquentGame $eloquentGame, Request $request)
     {
+        $this->authorize('view', $eloquentGame);
         $eloquentUser = $request->user();
         return view('game.show', compact('eloquentGame', 'eloquentUser'));
     }

@@ -8,4 +8,9 @@ class GameNotFoundException extends \Exception implements DomainException
     {
         parent::__construct("Game $gameId not found exception.");
     }
+
+    public function userMessage(): string
+    {
+        return 'Game is not found.';
+    }
 }

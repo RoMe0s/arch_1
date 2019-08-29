@@ -10,4 +10,9 @@ class CompetitorIsMissedException extends \Exception implements DomainException
     {
         parent::__construct("Competitor in the {$game->getId()} game is missed.");
     }
+
+    public function userMessage(): string
+    {
+        return 'Competitor is missed.';
+    }
 }

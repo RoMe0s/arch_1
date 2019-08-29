@@ -1,13 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.game')
 
-@section('content')
-    <div class="container">
-        <div class="row justify-content-center">
-            @if ($eloquentUser->id === $eloquentGame->owner_id || $eloquentUser->id === $eloquentGame->competitor_id)
-                <game-component id="{{ $eloquentGame->id }}"></game-component>
-            @else
-                <join-game-component id="{{ $eloquentGame->id }}"></join-game-component>
-            @endif
-        </div>
-    </div>
+@section('game-content')
+    @if ($eloquentUser->id === $eloquentGame->owner_id || $eloquentUser->id === $eloquentGame->competitor_id)
+        <game-component id="{{ $eloquentGame->id }}"></game-component>
+    @else
+        <join-game-component id="{{ $eloquentGame->id }}"></join-game-component>
+    @endif
 @endsection

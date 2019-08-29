@@ -1,11 +1,5 @@
-@extends('layouts.app')
+@extends('layouts.game')
 
-@section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-12">
-            <start-game-component></start-game-component>
-        </div>
-    </div>
-</div>
+@section('game-content')
+    <start-game-component></start-game-component>
 @endsection

@@ -13,4 +13,9 @@ class PlayerNameAlreadySetException extends \Exception implements DomainExceptio
     {
         parent::__construct("Player({$player->getId()}) name already set for the game - {$game->getId()}.");
     }
+
+    public function userMessage(): string
+    {
+        return 'Player name already set.';
+    }
 }

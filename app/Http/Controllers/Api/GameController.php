@@ -34,7 +34,6 @@ class GameController extends Controller
 
     public function show(EloquentGame $eloquentGame, Request $request, GameMapper $gameMapper, PlayerMapper $playerMapper)
     {
-        $this->authorize('participate', $eloquentGame);
         $eloquentGame->load(['owner', 'competitor', 'steps']);
 
         $somePlayer = $playerMapper->make($request->user());
@@ -59,7 +58,6 @@ class GameController extends Controller
 
     public function setName(EloquentGame $eloquentGame, SetPlayerNameRequest $request, PlayerNameSetterService $playerNameSetterService)
     {
-        $this->authorize('show', $eloquentGame);
         $setPlayerNameDTO = new SetPlayerNameDTO(
             $eloquentGame->id,
             $request->user()->id,
@@ -71,8 +69,6 @@ class GameController extends Controller
 
     public function makeAMove(EloquentGame $eloquentGame, MakeAMoveRequest $request, StepCreatorService $stepCreatorService)
     {
-        $this->authorize('participate', $eloquentGame);
-
         $newStepDTO = new NewStepDTO(
             $eloquentGame->id,
             $request->user()->id,

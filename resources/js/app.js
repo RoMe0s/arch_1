@@ -29,6 +29,19 @@ Vue.component('join-game-component', require('./components/join-game-component.v
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+Vue.mixin({
+    methods: {
+        handleException(error) {
+            const responseData = error.response.data;
+            toastr.error(responseData.message);
+
+            if ('errors' in responseData) {
+                _.each(_.flatten(_.values(responseData.errors)), toastr.error);
+            }
+        }
+    }
+})
+
 const app = new Vue({
     el: '#app',
 });

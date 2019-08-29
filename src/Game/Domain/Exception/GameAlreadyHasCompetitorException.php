@@ -10,4 +10,9 @@ class GameAlreadyHasCompetitorException extends \Exception implements DomainExce
     {
         parent::__construct("Game {$game->getId()} already has competitor.");
     }
+
+    public function userMessage(): string
+    {
+        return 'Competitor already exist.';
+    }
 }

@@ -2,4 +2,7 @@
 
 namespace Game\Domain\Exception;
 
-interface DomainException {}
+interface DomainException
+{
+    public function userMessage(): string;
+}

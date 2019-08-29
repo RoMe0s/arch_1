@@ -11,4 +11,9 @@ class StepIsNotUniqueException extends \Exception implements DomainException
     {
         parent::__construct("Step ({$step->getX()->getValue()}, {$step->getY()->getValue()}) is not unique for game - {$game->getId()}");
     }
+
+    public function userMessage(): string
+    {
+        return 'Step is not unique.';
+    }
 }

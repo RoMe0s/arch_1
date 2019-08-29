@@ -8,4 +8,9 @@ class PlayerNotFoundException extends \Exception implements DomainException
     {
         parent::__construct("Player $playerId not found exception.");
     }
+
+    public function userMessage(): string
+    {
+        return 'Player is not found.';
+    }
 }

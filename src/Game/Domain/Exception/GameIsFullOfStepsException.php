@@ -10,4 +10,9 @@ class GameIsFullOfStepsException extends \Exception implements DomainException
     {
         parent::__construct("Game {$game->getId()} has all of available steps.");
     }
+
+    public function userMessage(): string
+    {
+        return 'Game has maximum count of steps.';
+    }
 }

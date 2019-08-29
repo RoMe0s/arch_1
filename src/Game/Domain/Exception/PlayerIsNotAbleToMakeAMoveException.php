@@ -13,4 +13,9 @@ class PlayerIsNotAbleToMakeAMoveException extends \Exception implements DomainEx
     {
         parent::__construct("Player {$player->getId()} is not able to make a move in the game - {$game->getId()}.");
     }
+
+    public function userMessage(): string
+    {
+        return 'You are not able to make a move now.';
+    }
 }

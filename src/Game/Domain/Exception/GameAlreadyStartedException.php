@@ -10,4 +10,9 @@ class GameAlreadyStartedException extends \Exception implements DomainException
     {
         parent::__construct("Game {$game->getId()} has been already started.");
     }
+
+    public function userMessage(): string
+    {
+        return 'Game has been already started.';
+    }
 }

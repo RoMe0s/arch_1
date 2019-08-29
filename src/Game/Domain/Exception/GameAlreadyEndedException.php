@@ -10,4 +10,9 @@ class GameAlreadyEndedException extends \Exception implements DomainException
     {
         parent::__construct("Game {$game->getId()} has been already ended.");
     }
+
+    public function userMessage(): string
+    {
+        return 'Game has been already ended.';
+    }
 }

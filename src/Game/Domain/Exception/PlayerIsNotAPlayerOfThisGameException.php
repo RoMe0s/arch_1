@@ -13,4 +13,9 @@ class PlayerIsNotAPlayerOfThisGameException extends \Exception implements Domain
     {
         parent::__construct("Player {$player->getId()} is not a player of the game - {$game->getId()}.");
     }
+
+    public function userMessage(): string
+    {
+        return 'You are not a player of this game.';
+    }
 }

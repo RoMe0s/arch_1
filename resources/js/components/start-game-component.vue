@@ -9,10 +9,8 @@
     methods: {
       startNewGame() {
         axios.post('/api/game/start')
-          .then(response => {
-            window.location.href = `/game/${response.data.id}`;
-          })
-          .catch(console.log);
+          .then(response => window.location.href = `/game/${response.data.id}`)
+          .catch(this.handleException);
       }
     }
   }

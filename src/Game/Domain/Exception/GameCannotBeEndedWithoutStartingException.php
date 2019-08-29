@@ -10,4 +10,9 @@ class GameCannotBeEndedWithoutStartingException extends \Exception implements Do
     {
         parent::__construct("Game {$game->getId()} cannot be ended without starting.");
     }
+
+    public function userMessage(): string
+    {
+        return 'Game cannot be ended now.';
+    }
 }
