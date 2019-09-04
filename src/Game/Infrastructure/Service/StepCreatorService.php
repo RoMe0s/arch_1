@@ -6,19 +6,19 @@ use Game\Domain\Exception\{
     GameNotFoundException,
     PlayerNotFoundException
 };
-use Illuminate\Support\Facades\DB;
 use Game\Domain\Entity\{
-    Step,
     CoordinateX,
-    CoordinateY
+    CoordinateY,
+    Step
 };
 use Game\Infrastructure\DTO\NewStepDTO;
-use Game\Infrastructure\Repository\{
-    GameRepository,
-    PlayerRepository,
-    StepRepository
+use Game\Domain\Repository\{
+    GameRepositoryInterface,
+    PlayerRepositoryInterface,
+    StepRepositoryInterface
 };
 use Game\Domain\Service\MovementMakerService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class StepCreatorService
@@ -32,9 +32,9 @@ class StepCreatorService
     private $movementMakerService;
 
     function __construct(
-        GameRepository $gameRepository,
-        PlayerRepository $playerRepository,
-        StepRepository $stepRepository,
+        GameRepositoryInteface $gameRepository,
+        PlayerRepositoryInterface $playerRepository,
+        StepRepositoryInterface $stepRepository,
         MovementMakerService $movementMakerService
     ) {
         $this->gameRepository = $gameRepository;

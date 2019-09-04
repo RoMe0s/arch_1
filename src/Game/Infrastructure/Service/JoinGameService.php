@@ -7,8 +7,10 @@ use Game\Domain\Exception\{
     PlayerNotFoundException
 };
 use Game\Infrastructure\DTO\SetCompetitorDTO;
-use Game\Infrastructure\Repository\GameRepository;
-use Game\Infrastructure\Repository\PlayerRepository;
+use Game\Domain\Repository\{
+    GameRepositoryInterface,
+    PlayerRepositoryInterface
+};
 
 class JoinGameService
 {
@@ -16,8 +18,10 @@ class JoinGameService
 
     private $playerRepository;
 
-    public function __construct(GameRepository $gameRepository, PlayerRepository $playerRepository)
-    {
+    public function __construct(
+        GameRepositoryInterface $gameRepository,
+        PlayerRepositoryInterface $playerRepository
+    ) {
         $this->gameRepository = $gameRepository;
         $this->playerRepository = $playerRepository;
     }

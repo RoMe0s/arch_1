@@ -5,9 +5,9 @@ namespace Game\Infrastructure\Service;
 use Illuminate\Support\Str;
 use Game\Domain\Entity\Game;
 use Game\Domain\Exception\PlayerNotFoundException;
-use Game\Infrastructure\Repository\{
-    GameRepository,
-    PlayerRepository
+use Game\Domain\Repository\{
+    GameRepositoryInterface,
+    PlayerRepositoryInterface
 };
 
 class GameCreatorService
@@ -16,8 +16,10 @@ class GameCreatorService
 
     private $playerRepository;
 
-    function __construct(GameRepository $gameRepository, PlayerRepository $playerRepository)
-    {
+    function __construct(
+        GameRepositoryInterface $gameRepository,
+        PlayerRepositoryInterface $playerRepository
+    ) {
         $this->gameRepository = $gameRepository;
         $this->playerRepository = $playerRepository;
     }

@@ -8,9 +8,9 @@ use Game\Domain\Exception\{
     PlayerNotFoundException
 };
 use Game\Infrastructure\DTO\SetPlayerNameDTO;
-use Game\Infrastructure\Repository\{
-    GameRepository,
-    PlayerRepository
+use Game\Domain\Repository\{
+    GameRepositoryInterface,
+    PlayerRepositoryInterface
 };
 
 class PlayerNameSetterService
@@ -19,8 +19,10 @@ class PlayerNameSetterService
 
     private $playerRepository;
 
-    function __construct(GameRepository $gameRepository, PlayerRepository $playerRepository)
-    {
+    function __construct(
+        GameRepositoryInterface $gameRepository,
+        PlayerRepositoryInterface $playerRepository
+    ) {
         $this->gameRepository = $gameRepository;
         $this->playerRepository = $playerRepository;
     }
