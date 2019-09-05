@@ -33,8 +33,6 @@ final class Game
 
     private $stepsCount = 0;
 
-    private $lastStepId;
-
     private function __construct(
         string $uuid,
         Player $owner,
@@ -42,8 +40,7 @@ final class Game
         int $winnerId = null,
         \DateTime $startedAt = null,
         \DateTime $endedAt = null,
-        int $stepsCount = 0,
-        string $lastStepId = null
+        int $stepsCount = 0
     )
     {
         $this->uuid = $uuid;
@@ -53,7 +50,6 @@ final class Game
         $this->startedAt = $startedAt;
         $this->endedAt = $endedAt;
         $this->stepsCount = $stepsCount;
-        $this->lastStepId = $lastStepId;
     }
 
     public static function createGame(string $uuid, Player $owner): Game
@@ -140,13 +136,11 @@ final class Game
             throw new CompetitorIsMissedException($this);
         }
 
-        if (!$this->lastStepId) {
+        if (!$this->stepsCount) {
             return $this->playerIsTheOwner($player);
         }
 
-        return !array_filter($player->getSteps(), function (Step $step) {
-            return $step->getId() === $this->lastStepId;
-        });
+        return !$player->isLastActed();
     }
 
     public function getPlayerOfGame(Player $player): ?Player
@@ -181,18 +175,13 @@ final class Game
             throw new CompetitorIsMissedException($this);
         }
 
-        foreach ($this->owner->getSteps() as $ownerStep) {
-            if ($ownerStep->getId() === $step->getId()) {
-                return false;
-            }
+        if ($this->owner->isStepExist($step)) {
+            return false;
         }
 
-        foreach ($this->competitor->getSteps() as $competitorStep) {
-            if ($competitorStep->getId() === $step->getId()) {
-                return false;
-            }
+        if ($this->competitor->isStepExist($step)) {
+            return false;
         }
-
         return true;
     }
 

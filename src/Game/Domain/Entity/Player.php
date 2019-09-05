@@ -15,12 +15,19 @@ final class Player
 
     private $name;
 
+    private $lastActed;
+
     private $steps = [];
 
-    private function __construct(string $uuid, string $name = null, array $steps = [])
-    {
+    private function __construct(
+        string $uuid,
+        string $name = null,
+        bool $lastActed = false,
+        array $steps = []
+    ) {
         $this->uuid = $uuid;
         $this->name = $name;
+        $this->lastActed = $lastActed;
         $this->steps = $steps;
     }
 
@@ -45,6 +52,26 @@ final class Player
         }
 
         $this->steps[] = $step;
+    }
+
+    public function isStepExist(Step $step): bool
+    {
+        $coordinateX = $step->getX()->getValue();
+        $coordinateY = $step->getY()->getValue();
+
+        foreach ($this->getSteps() as $playerStep) {
+            $playerStepCoordinateX = $playerStep->getX()->getValue();
+            $playerStepCoordinateY = $playerStep->getY()->getValue();
+            if ($playerStepCoordinateX === $coordinateX && $playerStepCoordinateY === $coordinateY) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function isLastActed(): bool
+    {
+        return $this->lastActed;
     }
 
     public function getId(): string

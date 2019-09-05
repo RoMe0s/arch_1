@@ -19,6 +19,8 @@ class GameMapper
 
     public function make(EloquentGame $eloquentGame): Game
     {
+        $lastEloquentStep = $eloquentGame->steps->last();
+
         $eloquentOwner = $eloquentGame->owner;
         $eloquentSteps = $eloquentGame->steps->filter(
             function (EloquentStep $eloquentStep) use ($eloquentOwner) {
@@ -28,6 +30,9 @@ class GameMapper
         $eloquentOwner->setAttribute('steps', $eloquentSteps);
         if ($eloquentGame->owner_name) {
             $eloquentOwner->setAttribute('in_game_name', $eloquentGame->owner_name);
+        }
+        if ($lastEloquentStep && $lastEloquentStep->user_id === $eloquentOwner->id) {
+            $eloquentOwner->setAttribute('last_acted', true);
         }
         $owner = $this->playerMapper->make($eloquentOwner);
 
@@ -44,6 +49,9 @@ class GameMapper
             $eloquentCompetitor->setAttribute('steps', $eloquentSteps);
             if ($eloquentGame->competitor_name) {
                 $eloquentCompetitor->setAttribute('in_game_name', $eloquentGame->competitor_name);
+            }
+            if ($lastEloquentStep && $lastEloquentStep->user_id === $eloquentCompetitor->id) {
+                $eloquentCompetitor->setAttribute('last_acted', true);
             }
             $competitor = $this->playerMapper->make($eloquentCompetitor);
 
@@ -74,10 +82,6 @@ class GameMapper
             $stepsCountPropertyReflection = $gameReflection->getProperty('stepsCount');
             $stepsCountPropertyReflection->setAccessible(true);
             $stepsCountPropertyReflection->setValue($game, count($eloquentGame->steps));
-
-            $lastStepIdPropertyReflection = $gameReflection->getProperty('lastStepId');
-            $lastStepIdPropertyReflection->setAccessible(true);
-            $lastStepIdPropertyReflection->setValue($game, $eloquentGame->steps->last()->id);
         }
 
         return $game;

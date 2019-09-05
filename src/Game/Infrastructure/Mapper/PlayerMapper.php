@@ -41,6 +41,10 @@ class PlayerMapper
             $stepsPropertyReflection->setValue($player, $steps);
         }
 
+        $lastActedPropertyReflection = $playerReflection->getProperty('lastActed');
+        $lastActedPropertyReflection->setAccessible(true);
+        $lastActedPropertyReflection->setValue($player, (bool) $eloquentUser->last_acted);
+
         return $player;
     }
 }

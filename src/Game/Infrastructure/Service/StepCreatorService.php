@@ -32,7 +32,7 @@ class StepCreatorService
     private $movementMakerService;
 
     function __construct(
-        GameRepositoryInteface $gameRepository,
+        GameRepositoryInterface $gameRepository,
         PlayerRepositoryInterface $playerRepository,
         StepRepositoryInterface $stepRepository,
         MovementMakerService $movementMakerService

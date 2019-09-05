@@ -19,7 +19,8 @@ class User extends Authenticatable
 
     protected $appends = [
         'steps',
-        'in_game_name'
+        'in_game_name',
+        'last_acted'
     ];
 
     protected $hidden = [
