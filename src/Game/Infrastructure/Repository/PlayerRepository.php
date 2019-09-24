@@ -20,7 +20,7 @@ class PlayerRepository implements PlayerRepositoryInterface
     {
         $eloquentUser = EloquentUser::find($id);
         if ($eloquentUser) {
-            return $this->mapper->make($eloquentUser);
+            return $this->mapper->map($eloquentUser);
         }
         return null;
     }

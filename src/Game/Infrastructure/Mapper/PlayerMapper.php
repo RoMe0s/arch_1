@@ -17,7 +17,7 @@ class PlayerMapper
         $this->stepMapper = $stepMapper;
     }
 
-    public function make(EloquentUser $eloquentUser): Player
+    public function map(EloquentUser $eloquentUser): Player
     {
         $player = Player::createNew($eloquentUser->id);
 
@@ -32,7 +32,7 @@ class PlayerMapper
         if ($eloquentUser->steps && count($eloquentUser->steps)) {
             $steps = $eloquentUser->steps->map(
                 function (EloquentStep $eloquentStep) {
-                    return $this->stepMapper->make($eloquentStep);
+                    return $this->stepMapper->map($eloquentStep);
                 }
             )->toArray();
 

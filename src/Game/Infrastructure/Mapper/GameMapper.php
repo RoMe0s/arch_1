@@ -17,7 +17,7 @@ class GameMapper
         $this->playerMapper = $playerMapper;
     }
 
-    public function make(EloquentGame $eloquentGame): Game
+    public function map(EloquentGame $eloquentGame): Game
     {
         $lastEloquentStep = $eloquentGame->steps->last();
 
@@ -34,7 +34,7 @@ class GameMapper
         if ($lastEloquentStep && $lastEloquentStep->user_id === $eloquentOwner->id) {
             $eloquentOwner->setAttribute('last_acted', true);
         }
-        $owner = $this->playerMapper->make($eloquentOwner);
+        $owner = $this->playerMapper->map($eloquentOwner);
 
         $game = Game::createGame($eloquentGame->id, $owner);
 
@@ -53,7 +53,7 @@ class GameMapper
             if ($lastEloquentStep && $lastEloquentStep->user_id === $eloquentCompetitor->id) {
                 $eloquentCompetitor->setAttribute('last_acted', true);
             }
-            $competitor = $this->playerMapper->make($eloquentCompetitor);
+            $competitor = $this->playerMapper->map($eloquentCompetitor);
 
             $competitorPropertyReflection = $gameReflection->getProperty('competitor');
             $competitorPropertyReflection->setAccessible(true);

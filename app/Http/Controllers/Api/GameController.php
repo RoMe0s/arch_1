@@ -36,8 +36,8 @@ class GameController extends Controller
     {
         $eloquentGame->load(['owner', 'competitor', 'steps']);
 
-        $somePlayer = $playerMapper->make($request->user());
-        $game = $gameMapper->make($eloquentGame);
+        $somePlayer = $playerMapper->map($request->user());
+        $game = $gameMapper->map($eloquentGame);
 
         $player = $game->getPlayerOfGame($somePlayer);
         $competitor = $game->getAnotherPlayer($player);

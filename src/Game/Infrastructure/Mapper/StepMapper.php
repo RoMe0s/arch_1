@@ -11,7 +11,7 @@ use Game\Infrastructure\Persistance\Eloquent\Step as EloquentStep;
 
 class StepMapper
 {
-    public function make(EloquentStep $eloquentStep): Step
+    public function map(EloquentStep $eloquentStep): Step
     {
         $coordinateX = new CoordinateX($eloquentStep->coordinate_x);
         $coordinateY = new CoordinateY($eloquentStep->coordinate_y);

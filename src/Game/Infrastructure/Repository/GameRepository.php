@@ -20,7 +20,7 @@ class GameRepository implements GameRepositoryInterface
     {
         $eloquentGame = EloquentGame::with(['owner', 'competitor', 'steps'])->find($id);
         if ($eloquentGame) {
-            return $this->mapper->make($eloquentGame);
+            return $this->mapper->map($eloquentGame);
         }
         return null;
     }
