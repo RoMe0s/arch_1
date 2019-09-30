@@ -3,7 +3,6 @@
 namespace Game\Infrastructure\Persistance\Eloquent;
 
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Collection;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
@@ -14,13 +13,8 @@ class User extends Authenticatable
         'id',
         'name',
         'email',
-        'password'
-    ];
-
-    protected $appends = [
-        'steps',
-        'in_game_name',
-        'last_acted'
+        'password',
+        'api_token'
     ];
 
     protected $hidden = [

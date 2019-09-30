@@ -39,7 +39,7 @@ final class Player
     public function setName(string $name): void
     {
         if ($this->name) {
-            throw new PlayerNameAlreadySetException($this, $this->game);
+            throw new PlayerNameAlreadySetException($this);
         }
 
         $this->name = $name;

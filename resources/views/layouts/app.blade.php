@@ -10,6 +10,11 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Scripts -->
+    @auth
+        <script>
+            userToken = '{{ auth()->user()->api_token }}';
+        </script>
+    @endauth
     <script src="{{ asset('js/app.js') }}" defer></script>
 
     <!-- Fonts -->

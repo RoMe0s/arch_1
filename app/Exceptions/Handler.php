@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use Exception;
 use Game\Domain\Exception\DomainException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -48,7 +49,7 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $exception)
     {
         if ($exception instanceof DomainException) {
-            $exception = new Exception($exception->userMessage());
+            $exception = new HttpException(400, $exception->userMessage(), $exception);
         }
         return parent::render($request, $exception);
     }

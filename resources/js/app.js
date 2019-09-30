@@ -40,8 +40,11 @@ Vue.mixin({
             }
         }
     }
-})
+});
 
 const app = new Vue({
     el: '#app',
+    created() {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${userToken}`;
+    },
 });

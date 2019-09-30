@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -13,9 +11,10 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::group(['middleware' => 'auth'], function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::group(['prefix' => 'user'], function () {
+        Route::get('refresh', 'UserController@refresh');
+        Route::get('/', 'UserController@get');
     });
 
     Route::group(['prefix' => 'game'], function () {
