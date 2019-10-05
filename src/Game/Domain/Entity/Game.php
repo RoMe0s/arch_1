@@ -72,6 +72,10 @@ final class Game
 
     public function startGame(): void
     {
+        if (!$this->competitor) {
+            throw new CompetitorIsMissedException($this);
+        }
+
         if ($this->startedAt) {
             throw new GameAlreadyStartedException($this);
         }
@@ -98,6 +102,10 @@ final class Game
             throw new GameHasNotStartedYetException($this);
         }
 
+        if ($this->endedAt) {
+            throw new GameAlreadyEndedException($this);
+        }
+
         if ($this->stepsCount === self::MAX_COUNT_OF_STEPS) {
             throw new GameIsFullOfStepsException($this);
         }
@@ -107,6 +115,10 @@ final class Game
 
     public function setWinner(Player $player): void
     {
+        if (!$this->playerIsParticipant($player)) {
+            throw new PlayerIsNotAPlayerOfThisGameException($this, $player);
+        }
+
         if ($this->winnerId) {
             throw new GameAlreadyHasWinnerException($this);
         }
@@ -134,6 +146,18 @@ final class Game
     {
         if (!$this->competitor) {
             throw new CompetitorIsMissedException($this);
+        }
+
+        if (!$this->playerIsParticipant($player)) {
+            throw new PlayerIsNotAPlayerOfThisGameException($this, $player);
+        }
+
+        if (!$this->startedAt) {
+            throw new GameHasNotStartedYetException($this);
+        }
+
+        if ($this->endedAt) {
+            throw new GameAlreadyEndedException($this);
         }
 
         if (!$this->stepsCount) {
