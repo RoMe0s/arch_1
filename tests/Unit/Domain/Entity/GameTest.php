@@ -1,19 +1,26 @@
 <?php
 
-namespace Tests\Unit\Domain;
+namespace Tests\Unit\Domain\Entity;
 
-use Game\Domain\Entity\Game;
-use Game\Domain\Entity\Player;
-use Game\Domain\Exception\CompetitorAndOwnerCannotBeEqualException;
-use Game\Domain\Exception\CompetitorIsMissedException;
-use Game\Domain\Exception\GameAlreadyEndedException;
-use Game\Domain\Exception\GameAlreadyHasCompetitorException;
-use Game\Domain\Exception\GameAlreadyHasWinnerException;
-use Game\Domain\Exception\GameAlreadyStartedException;
-use Game\Domain\Exception\GameCannotBeEndedWithoutStartingException;
-use Game\Domain\Exception\GameHasNotStartedYetException;
-use Game\Domain\Exception\GameIsFullOfStepsException;
-use Game\Domain\Exception\PlayerIsNotAPlayerOfThisGameException;
+use Game\Domain\Entity\{
+    Game,
+    Player,
+    Step,
+    CoordinateX,
+    CoordinateY
+};
+use Game\Domain\Exception\{
+    CompetitorAndOwnerCannotBeEqualException,
+    CompetitorIsMissedException,
+    GameAlreadyEndedException,
+    GameAlreadyHasCompetitorException,
+    GameAlreadyHasWinnerException,
+    GameAlreadyStartedException,
+    GameCannotBeEndedWithoutStartingException,
+    GameHasNotStartedYetException,
+    GameIsFullOfStepsException,
+    PlayerIsNotAPlayerOfThisGameException
+};
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -32,8 +39,8 @@ class GameTest extends TestCase
     {
         $game = Game::createGame('test-id', $this->player);
 
-        $this->assertEquals($game->getId(), 'test-id');
-        $this->assertEquals($game->getOwner(), $this->player);
+        $this->assertEquals('test-id', $game->getId());
+        $this->assertEquals($this->player, $game->getOwner());
     }
 
     public function testSetCompetitorEqualToOwner()
@@ -284,7 +291,7 @@ class GameTest extends TestCase
         $game->playerIsAbleToMakeAMove($anotherPlayer);
     }
 
-    public function testPlayerIsAbleToMakeAMove()
+    public function testPlayerIsAbleToMakeAFirstMove()
     {
         $game = Game::createGame(Str::uuid(), $this->player);
         $competitor = Player::createNew(Str::uuid());
@@ -292,8 +299,8 @@ class GameTest extends TestCase
         $game->setCompetitor($competitor);
         $game->startGame();
 
-        $this->assertTrue($game->playerIsAbleToMakeAMove($this->player));
         $this->assertFalse($game->playerIsAbleToMakeAMove($competitor));
+        $this->assertTrue($game->playerIsAbleToMakeAMove($this->player));
     }
 
     public function testPlayerIsAbleToMakeAMoveAfterEnding()
@@ -308,5 +315,148 @@ class GameTest extends TestCase
         $this->expectException(GameAlreadyEndedException::class);
 
         $game->playerIsAbleToMakeAMove($this->player);
+    }
+
+    public function testGetPlayerOfGameWrongUser()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+        $wrongPlayer = Player::createNew(Str::uuid());
+
+        $this->expectException(PlayerIsNotAPlayerOfThisGameException::class);
+
+        $game->getPlayerOfGame($wrongPlayer);
+    }
+
+    public function testGetPlayerOfGame()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+
+        $player = $game->getPlayerOfGame($this->player);
+        $this->assertEquals($player, $this->player);
+    }
+
+    public function testIsStepUniqueWithoutCompetitor()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+        $step = new Step(Str::uuid(), new CoordinateX(1), new CoordinateY(2));
+
+        $this->expectException(CompetitorIsMissedException::class);
+        $game->isStepUnique($step);
+    }
+
+    public function testIsStepUnique()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+        $competitor = Player::createNew(Str::uuid());
+        $step = new Step(Str::uuid(), new CoordinateX(1), new CoordinateY(2));
+
+        $game->setCompetitor($competitor);
+
+        $this->assertTrue($game->isStepUnique($step));
+    }
+
+    public function testGetId()
+    {
+        $game = Game::createGame('test-id', $this->player);
+
+        $this->assertEquals('test-id', $game->getId());
+    }
+
+    public function testGetOwner()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+
+        $this->assertEquals($this->player, $game->getOwner());
+    }
+
+    public function testGetCompetitorWithoutCompetitor()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+
+        $this->assertNull($game->getCompetitor());
+    }
+
+    public function testGetCompetitor()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+        $competitor = Player::createNew(Str::uuid());
+
+        $game->setCompetitor($competitor);
+
+        $this->assertEquals($competitor, $game->getCompetitor());
+    }
+
+    public function testGetWinnerWithNoWinner()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+
+        $this->assertNull($game->getWinner());
+    }
+
+    public function testGetWinner()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+        $competitor = Player::createNew(Str::uuid());
+
+        $game->setCompetitor($competitor);
+        $game->setWinner($competitor);
+
+        $this->assertEquals($competitor, $game->getWinner());
+    }
+
+    public function testGetStartedAtWithoutStarting()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+
+        $this->assertNull($game->getStartedAt());
+    }
+
+    public function testGetStartedAt()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+        $competitor = Player::createNew(Str::uuid());
+
+        $game->setCompetitor($competitor);
+        $game->startGame();
+
+        $this->assertNotNull($game->getStartedAt());
+    }
+
+    public function testGetEndedAtWithoutEnding()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+
+        $this->assertNull($game->getEndedAt());
+    }
+
+    public function testGetEndedAt()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+        $competitor = Player::createNew(Str::uuid());
+
+        $game->setCompetitor($competitor);
+        $game->startGame();
+        $game->endGame();
+
+        $this->assertNotNull($game->getEndedAt());
+    }
+
+    public function testGetStepsCountWithoutAny()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+
+        $this->assertEquals(0, $game->getStepsCount());
+    }
+
+    public function testGetStepsCount()
+    {
+        $game = Game::createGame(Str::uuid(), $this->player);
+        $competitor = Player::createNew(Str::uuid());
+
+        $game->setCompetitor($competitor);
+        $game->startGame();
+        $game->incrementStepsCount();
+
+        $this->assertEquals(1, $game->getStepsCount());
     }
 }

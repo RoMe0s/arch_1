@@ -6,8 +6,10 @@ use Game\Infrastructure\Persistance\Eloquent\{
     Game,
     User
 };
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\{
+    RefreshDatabase,
+    WithFaker
+};
 use Tests\TestCase;
 
 class GameControllerTest extends TestCase
