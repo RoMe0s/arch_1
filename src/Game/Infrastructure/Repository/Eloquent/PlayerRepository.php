@@ -1,6 +1,6 @@
 <?php
 
-namespace Game\Infrastructure\Repository;
+namespace Game\Infrastructure\Repository\Eloquent;
 
 use Game\Domain\Entity\Player;
 use Game\Domain\Repository\PlayerRepositoryInterface;

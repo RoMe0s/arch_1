@@ -25,17 +25,17 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(
             \Game\Domain\Repository\GameRepositoryInterface::class,
-            \Game\Infrastructure\Repository\GameRepository::class
+            \Game\Infrastructure\Repository\Eloquent\GameRepository::class
         );
 
         $this->app->bind(
             \Game\Domain\Repository\PlayerRepositoryInterface::class,
-            \Game\Infrastructure\Repository\PlayerRepository::class
+            \Game\Infrastructure\Repository\Eloquent\PlayerRepository::class
         );
 
         $this->app->bind(
             \Game\Domain\Repository\StepRepositoryInterface::class,
-            \Game\Infrastructure\Repository\StepRepository::class
+            \Game\Infrastructure\Repository\Eloquent\StepRepository::class
         );
     }
 }

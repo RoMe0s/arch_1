@@ -16,11 +16,11 @@ $factory->define(Game::class, function (Faker $faker) {
     $dateTime->add(new DateInterval('P1D'));
     $endedAt = $dateTime->format('Y-m-d H:i:s');
 
-    $owner = factory(User::class)->create();
-
     return [
         'id' => $faker->uuid,
-        'owner_id' => $owner->id,
+        'owner_id' => function () {
+            return factory(User::class)->create()->id;
+        },
         'owner_name' => $faker->name,
         'competitor_name' => $faker->name,
         'started_at' => $startedAt,
