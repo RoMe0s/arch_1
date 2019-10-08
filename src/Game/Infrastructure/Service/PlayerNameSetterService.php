@@ -37,11 +37,8 @@ class PlayerNameSetterService
 
         $playerId = $setPlayerNameDTO->getPlayerId();
         $somePlayer = Player::createNew($playerId);
-        if (!$somePlayer) {
-            throw new PlayerNotFoundException($playerId);
-        }
-
         $player = $game->getPlayerOfGame($somePlayer);
+
         $player->setName($setPlayerNameDTO->getPlayerName());
 
         $this->gameRepository->save($game);
