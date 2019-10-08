@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Domain\Service;
 
+use Game\Infrastructure\Mapper\StepMapper;
 use Game\Domain\Repository\{
     GameRepositoryInterface,
     StepRepositoryInterface,
@@ -9,21 +10,25 @@ use Game\Domain\Repository\{
 };
 use Game\Infrastructure\Repository\InMemory\{
     GameRepository,
+    InMemoryStorage,
     StepRepository,
     PlayerRepository
 };
-use Tests\TestCase;
-use Game\Infrastructure\Persistance\Eloquent\{
-    User as EloquentUser,
-    Step as EloquentStep
-};
 use Game\Domain\Service\CheckIfSomeoneWinsService;
+use Tests\TestCase;
 
 class CheckIfSomeoneWinsServiceTest extends TestCase
 {
     public function setUp(): void
     {
         parent::setUp();
+
+        $this->app->singleton(
+            InMemoryStorage::class,
+             function () {
+                return new InMemoryStorage();
+             }
+        );
 
         $this->app->bind(
             GameRepositoryInterface::class,
@@ -45,10 +50,12 @@ class CheckIfSomeoneWinsServiceTest extends TestCase
     {
         /** @var GameRepository $gameRepository */
         $gameRepository = resolve(GameRepositoryInterface::class);
-        /** @var StepRepository $stepRepository */
-        $stepRepository = resolve(StepRepositoryInterface::class);
         /** @var PlayerRepository $playerRepository */
         $playerRepository = resolve(PlayerRepositoryInterface::class);
+        /** @var StepRepository $stepRepository */
+        $stepRepository = resolve(StepRepositoryInterface::class);
+        /** @var StepMapper $stepMapper */
+        $stepMapper = resolve(StepMapper::class);
 
         $eloquentOwner = $playerRepository->generateStub();
         $eloquentGame = $gameRepository->generateStub([
@@ -67,12 +74,18 @@ class CheckIfSomeoneWinsServiceTest extends TestCase
                     $userId = $eloquentGame->competitor_id;
                 }
 
-                $stepRepository->save($game, $player, [
-                    'game_id' => $eloquentGame->id,
-                    'user_id' => $userId,
-                    'coordinate_x' => $coordinateX,
-                    'coordinate_y' => $coordinateY
-                ]);
+                $player = $playerRepository->findById($userId);
+
+                $stubStep = $stepMapper->map(
+                    $stepRepository->generateStub([
+                        'user_id' => $userId,
+                        'game_id' => $eloquentGame->id,
+                        'coordinate_x' => $coordinateX,
+                        'coordinate_y' => $coordinateY
+                    ])
+                );
+
+                $stepRepository->save($game, $player, $stubStep);
 
                 $stepNo++;
             }
@@ -89,32 +102,36 @@ class CheckIfSomeoneWinsServiceTest extends TestCase
     {
         /** @var GameRepository $gameRepository */
         $gameRepository = resolve(GameRepositoryInterface::class);
+        /** @var PlayerRepository $playerRepository */
+        $playerRepository = resolve(PlayerRepositoryInterface::class);
+        /** @var StepRepository $stepRepository */
+        $stepRepository = resolve(StepRepositoryInterface::class);
 
         $eloquentGame = $gameRepository->generateStub([
-            'competitor_id' => factory(EloquentUser::class)->make()->id
+            'competitor_id' => $playerRepository->generateStub()->id
         ]);
 
         //owner steps
         for ($stepNo = 0; $stepNo < 3; $stepNo++) {
-            factory(EloquentStep::class)->create([
+            $stepRepository->generateStub([
                 'game_id' => $eloquentGame->id,
                 'user_id' => $eloquentGame->owner_id,
                 'coordinate_x' => $stepNo,
-                'coordinate_y' => $stepNo
+                'coordinate_y' => $stepNo,
             ]);
         }
 
         //competitor steps
         for ($stepNo = 1; $stepNo < 3; $stepNo++) {
-            factory(EloquentStep::class)->create([
+            $stepRepository->generateStub([
                 'game_id' => $eloquentGame->id,
                 'user_id' => $eloquentGame->competitor_id,
                 'coordinate_x' => 0,
-                'coordinate_y' => $stepNo
+                'coordinate_y' => $stepNo,
             ]);
         }
 
-        $game = resolve(GameRepositoryInterface::class)->findById($eloquentGame->id);
+        $game = $gameRepository->findById($eloquentGame->id);
 
         resolve(CheckIfSomeoneWinsService::class)->checkWinner($game);
 
@@ -126,32 +143,36 @@ class CheckIfSomeoneWinsServiceTest extends TestCase
     {
         /** @var GameRepository $gameRepository */
         $gameRepository = resolve(GameRepositoryInterface::class);
+        /** @var PlayerRepository $playerRepository */
+        $playerRepository = resolve(PlayerRepositoryInterface::class);
+        /** @var StepRepository $stepRepository */
+        $stepRepository = resolve(StepRepositoryInterface::class);
 
         $eloquentGame = $gameRepository->generateStub([
-            'competitor_id' => factory(EloquentUser::class)->make()->id
+            'competitor_id' => $playerRepository->generateStub()->id
         ]);
 
         //competitor steps
         for ($stepNo = 0; $stepNo < 3; $stepNo++) {
-            factory(EloquentStep::class)->create([
+            $stepRepository->generateStub([
                 'game_id' => $eloquentGame->id,
                 'user_id' => $eloquentGame->competitor_id,
                 'coordinate_x' => $stepNo,
-                'coordinate_y' => $stepNo
+                'coordinate_y' => $stepNo,
             ]);
         }
 
         //owner steps
         for ($stepNo = 1; $stepNo < 3; $stepNo++) {
-            factory(EloquentStep::class)->create([
+            $stepRepository->generateStub([
                 'game_id' => $eloquentGame->id,
                 'user_id' => $eloquentGame->owner_id,
                 'coordinate_x' => 0,
-                'coordinate_y' => $stepNo
+                'coordinate_y' => $stepNo,
             ]);
         }
 
-        $game = resolve(GameRepositoryInterface::class)->findById($eloquentGame->id);
+        $game = $gameRepository->findById($eloquentGame->id);
 
         resolve(CheckIfSomeoneWinsService::class)->checkWinner($game);
 

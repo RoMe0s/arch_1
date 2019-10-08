@@ -7,30 +7,34 @@ use Game\Domain\Repository\PlayerRepositoryInterface;
 use Game\Infrastructure\Persistance\Eloquent\User as EloquentUser;
 use Game\Infrastructure\Mapper\PlayerMapper;
 
-class PlayerRepository extends BaseRepository implements PlayerRepositoryInterface
+class PlayerRepository implements PlayerRepositoryInterface
 {
+    private $storage;
+
     private $mapper;
 
-    function __construct(PlayerMapper $mapper)
+    function __construct(InMemoryStorage $storage, PlayerMapper $mapper)
     {
-        parent::__construct();
+        $this->storage = $storage;
         $this->mapper = $mapper;
     }
 
     public function findById(string $id): ?Player
     {
-        $eloquentUser = $this->collection->get($id);
+        $eloquentUser = $this->storage->get(PlayerRepositoryInterface::class, $id);
         if ($eloquentUser) {
             return $this->mapper->map($eloquentUser);
         }
         return null;
     }
 
-    public function generateStub(array $attributes = []): EloquentUser
+    public function generateStub(array $attributes = [], bool $saveToStorage = true): EloquentUser
     {
         $eloquentUser = factory(EloquentUser::class)->make($attributes);
 
-        $this->collection->put($eloquentUser->id, $eloquentUser);
+        if ($saveToStorage) {
+            $this->storage->set(PlayerRepositoryInterface::class, $eloquentUser->id, $eloquentUser);
+        }
 
         return $eloquentUser;
     }

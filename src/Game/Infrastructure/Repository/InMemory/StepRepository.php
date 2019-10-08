@@ -9,12 +9,15 @@ use Game\Domain\Repository\StepRepositoryInterface;
 use Game\Infrastructure\Mapper\PlayerMapper;
 use Game\Infrastructure\Persistance\Eloquent\Step as EloquentStep;
 
-class StepRepository extends BaseRepository implements StepRepositoryInterface
+class StepRepository implements StepRepositoryInterface
 {
+    private $storage;
+
     private $mapper;
 
-    function __construct(PlayerMapper $mapper)
+    function __construct(InMemoryStorage $storage, PlayerMapper $mapper)
     {
+        $this->storage = $storage;
         $this->mapper = $mapper;
     }
 
@@ -28,14 +31,16 @@ class StepRepository extends BaseRepository implements StepRepositoryInterface
             'coordinate_y' => $step->getY()->getValue(),
         ]);
 
-        $this->collection->put($eloquentStep->id, $eloquentStep);
+        $this->storage->set(StepRepositoryInterface::class, $eloquentStep->id, $eloquentStep);
     }
 
-    public function generateStub(array $attributes = []): EloquentStep
+    public function generateStub(array $attributes = [], bool $saveToStorage = true): EloquentStep
     {
         $eloquentStep = factory(EloquentStep::class)->make($attributes);
 
-        $this->collection->put($eloquentStep->id, $eloquentStep);
+        if ($saveToStorage) {
+            $this->storage->set(StepRepositoryInterface::class, $eloquentStep->id, $eloquentStep);
+        }
 
         return $eloquentStep;
     }

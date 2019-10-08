@@ -2,21 +2,53 @@
 
 namespace Tests\Unit\Infrastructure\Service;
 
-use Game\Infrastructure\Persistance\Eloquent\User;
-use Game\Infrastructure\Repository\Eloquent\GameRepository;
+use Game\Domain\Repository\{
+    GameRepositoryInterface,
+    PlayerRepositoryInterface,
+    StepRepositoryInterface
+};
+use Game\Infrastructure\Repository\InMemory\{
+    GameRepository,
+    InMemoryStorage,
+    PlayerRepository,
+    StepRepository
+};
 use Game\Domain\Exception\{
     GameNotFoundException,
     PlayerNotFoundException
 };
 use Game\Infrastructure\DTO\SetCompetitorDTO;
-use Game\Infrastructure\Persistance\Eloquent\Game;
 use Game\Infrastructure\Service\JoinGameService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class JoinGameServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->app->singleton(
+            InMemoryStorage::class,
+            function () {
+                return new InMemoryStorage();
+            }
+        );
+
+        $this->app->bind(
+            GameRepositoryInterface::class,
+            GameRepository::class
+        );
+
+        $this->app->bind(
+            StepRepositoryInterface::class,
+            StepRepository::class
+        );
+
+        $this->app->bind(
+            PlayerRepositoryInterface::class,
+            PlayerRepository::class
+        );
+    }
 
     public function testJoinGameWrongGame()
     {
@@ -32,7 +64,7 @@ class JoinGameServiceTest extends TestCase
 
     public function testJoinGameWrongPlayer()
     {
-        $eloquentGame = factory(Game::class)->create();
+        $eloquentGame = resolve(GameRepositoryInterface::class)->generateStub();
 
         $dto = new SetCompetitorDTO(
             $eloquentGame->id,
@@ -46,8 +78,10 @@ class JoinGameServiceTest extends TestCase
 
     public function testJoinGame()
     {
-        $eloquentGame = factory(Game::class)->create();
-        $eloquentCompetitor = factory(User::class)->create();
+        /** @var GameRepositoryInterface $gameRepository */
+        $gameRepository = resolve(GameRepositoryInterface::class);
+        $eloquentGame = $gameRepository->generateStub();
+        $eloquentCompetitor = resolve(PlayerRepositoryInterface::class)->generateStub();
 
         $dto = new SetCompetitorDTO(
             $eloquentGame->id,
@@ -56,7 +90,7 @@ class JoinGameServiceTest extends TestCase
 
         resolve(JoinGameService::class)->joinGame($dto);
 
-        $game = resolve(GameRepository::class)->findById($eloquentGame->id);
+        $game = $gameRepository->findById($eloquentGame->id);
 
         $this->assertNotNull($game->getCompetitor());
         $this->assertEquals($eloquentCompetitor->id, $game->getCompetitor()->getId());

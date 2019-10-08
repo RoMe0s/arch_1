@@ -7,7 +7,6 @@ use Game\Infrastructure\Repository\Eloquent\GameRepository;
 use Game\Infrastructure\Persistance\Eloquent\Game as EloquentGame;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Game\Infrastructure\Mapper\GameMapper;
-use Game\Domain\Entity\Game;
 
 class GameRepositoryTest extends TestCase
 {

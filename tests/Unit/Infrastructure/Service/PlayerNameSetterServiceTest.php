@@ -2,18 +2,54 @@
 
 namespace Tests\Unit\Infrastructure\Service;
 
-use Game\Infrastructure\Repository\Eloquent\GameRepository;
+use Game\Domain\Repository\{
+    GameRepositoryInterface,
+    PlayerRepositoryInterface,
+    StepRepositoryInterface
+};
+use Game\Infrastructure\Repository\InMemory\{
+    GameRepository,
+    InMemoryStorage,
+    PlayerRepository,
+    StepRepository
+};
 use Game\Domain\Exception\{
     GameNotFoundException,
     PlayerIsNotAPlayerOfThisGameException
 };
 use Game\Infrastructure\DTO\SetPlayerNameDTO;
-use Game\Infrastructure\Persistance\Eloquent\Game;
 use Game\Infrastructure\Service\PlayerNameSetterService;
 use Tests\TestCase;
 
 class PlayerNameSetterServiceTest extends TestCase
 {
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->app->singleton(
+            InMemoryStorage::class,
+            function () {
+                return new InMemoryStorage();
+            }
+        );
+
+        $this->app->bind(
+            GameRepositoryInterface::class,
+            GameRepository::class
+        );
+
+        $this->app->bind(
+            StepRepositoryInterface::class,
+            StepRepository::class
+        );
+
+        $this->app->bind(
+            PlayerRepositoryInterface::class,
+            PlayerRepository::class
+        );
+    }
+
     public function testSetPlayerNameWrongGame()
     {
         $dto = new SetPlayerNameDTO(
@@ -29,7 +65,7 @@ class PlayerNameSetterServiceTest extends TestCase
 
     public function testSetPlayerNameWrongPlayer()
     {
-        $eloquentGame = factory(Game::class)->create();
+        $eloquentGame = resolve(GameRepositoryInterface::class)->generateStub();
         $dto = new SetPlayerNameDTO(
             $eloquentGame->id,
             'any-player-id',
@@ -43,7 +79,9 @@ class PlayerNameSetterServiceTest extends TestCase
 
     public function testSetPlayerName()
     {
-        $eloquentGame = factory(Game::class)->create([
+        /** @var GameRepositoryInterface $gameRepository */
+        $gameRepository = resolve(GameRepositoryInterface::class);
+        $eloquentGame = $gameRepository->generateStub([
             'owner_name' => null
         ]);
         $dto = new SetPlayerNameDTO(
@@ -54,7 +92,7 @@ class PlayerNameSetterServiceTest extends TestCase
 
         resolve(PlayerNameSetterService::class)->setPlayerName($dto);
 
-        $game = resolve(GameRepository::class)->findById($eloquentGame->id);
+        $game = $gameRepository->findById($eloquentGame->id);
 
         $this->assertEquals('new-owner-name', $game->getOwner()->getName());
     }

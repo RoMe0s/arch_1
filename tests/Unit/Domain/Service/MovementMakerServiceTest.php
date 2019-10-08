@@ -2,38 +2,78 @@
 
 namespace Tests\Unit\Domain\Service;
 
-use Game\Domain\Exception\GameAlreadyEndedException;
-use Game\Domain\Exception\PlayerIsNotAbleToMakeAMoveException;
-use Game\Domain\Exception\StepIsNotUniqueException;
+use Game\Domain\Exception\{
+    GameAlreadyEndedException,
+    PlayerIsNotAbleToMakeAMoveException,
+    StepIsNotUniqueException
+};
+use Game\Domain\Repository\{
+    GameRepositoryInterface,
+    PlayerRepositoryInterface,
+    StepRepositoryInterface
+};
 use Game\Domain\Service\MovementMakerService;
 use Game\Infrastructure\Mapper\StepMapper;
-use Game\Infrastructure\Persistance\Eloquent\{
-    Game as EloquentGame,
-    Step as EloquentStep,
-    User as EloquentUser
+use Game\Infrastructure\Repository\InMemory\{
+    GameRepository,
+    InMemoryStorage,
+    PlayerRepository,
+    StepRepository
 };
-use Game\Infrastructure\Repository\Eloquent\GameRepository;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class MovementMakerServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->app->singleton(
+            InMemoryStorage::class,
+            function () {
+                return new InMemoryStorage();
+            }
+        );
+
+        $this->app->bind(
+            GameRepositoryInterface::class,
+            GameRepository::class
+        );
+
+        $this->app->bind(
+            StepRepositoryInterface::class,
+            StepRepository::class
+        );
+
+        $this->app->bind(
+            PlayerRepositoryInterface::class,
+            PlayerRepository::class
+        );
+    }
 
     public function testMakeAMoveNotUniqueStep()
     {
-        $eloquentGame = factory(EloquentGame::class)->create([
-            'competitor_id' => factory(EloquentUser::class)->create()->id
+        /** @var GameRepository $gameRepository */
+        $gameRepository = resolve(GameRepositoryInterface::class);
+        /** @var PlayerRepository $playerRepository */
+        $playerRepository = resolve(PlayerRepositoryInterface::class);
+        /** @var StepRepository $stepRepository */
+        $stepRepository = resolve(StepRepositoryInterface::class);
+        /** @var StepMapper $stepMapper */
+        $stepMapper = resolve(StepMapper::class);
+
+        $eloquentGame = $gameRepository->generateStub([
+            'competitor_id' => $playerRepository->generateStub()->id
         ]);
-        $notUniqueEloquentStep = factory(EloquentStep::class)->create([
+        $notUniqueEloquentStep = $stepRepository->generateStub([
             'game_id' => $eloquentGame->id,
             'user_id' => $eloquentGame->owner_id,
             'coordinate_x' => 0,
-            'coordinate_y' => 0
+            'coordinate_y' => 0,
         ]);
 
-        $game = resolve(GameRepository::class)->findById($eloquentGame->id);
-        $notUniqueStep = resolve(StepMapper::class)->map($notUniqueEloquentStep);
+        $game = $gameRepository->findById($eloquentGame->id);
+        $notUniqueStep = $stepMapper->map($notUniqueEloquentStep);
 
         $this->expectException(StepIsNotUniqueException::class);
 
@@ -42,18 +82,27 @@ class MovementMakerServiceTest extends TestCase
 
     public function testMakeAMoveGameAlreadyEnded()
     {
-        $eloquentGame = factory(EloquentGame::class)->create([
-            'competitor_id' => factory(EloquentUser::class)->create()->id,
+        /** @var GameRepository $gameRepository */
+        $gameRepository = resolve(GameRepositoryInterface::class);
+        /** @var PlayerRepository $playerRepository */
+        $playerRepository = resolve(PlayerRepositoryInterface::class);
+        /** @var StepRepository $stepRepository */
+        $stepRepository = resolve(StepRepositoryInterface::class);
+        /** @var StepMapper $stepMapper */
+        $stepMapper = resolve(StepMapper::class);
+
+        $eloquentGame = $gameRepository->generateStub([
+            'competitor_id' => $playerRepository->generateStub()->id
         ]);
-        $eloquentStubStep = factory(EloquentStep::class)->make([
+        $eloquentStubStep = $stepRepository->generateStub([
             'game_id' => $eloquentGame->id,
             'user_id' => $eloquentGame->owner_id,
             'coordinate_x' => 0,
-            'coordinate_y' => 0
-        ]);
+            'coordinate_y' => 0,
+        ], false);
 
-        $game = resolve(GameRepository::class)->findById($eloquentGame->id);
-        $stubStep = resolve(StepMapper::class)->map($eloquentStubStep);
+        $game = $gameRepository->findById($eloquentGame->id);
+        $stubStep = $stepMapper->map($eloquentStubStep);
 
         $this->expectException(GameAlreadyEndedException::class);
 
@@ -62,19 +111,28 @@ class MovementMakerServiceTest extends TestCase
 
     public function testMakeAMovePlayerIsNotAbleToMakeAMove()
     {
-        $eloquentGame = factory(EloquentGame::class)->create([
-            'competitor_id' => factory(EloquentUser::class)->create()->id,
-            'ended_at' => null
+        /** @var GameRepository $gameRepository */
+        $gameRepository = resolve(GameRepositoryInterface::class);
+        /** @var PlayerRepository $playerRepository */
+        $playerRepository = resolve(PlayerRepositoryInterface::class);
+        /** @var StepRepository $stepRepository */
+        $stepRepository = resolve(StepRepositoryInterface::class);
+        /** @var StepMapper $stepMapper */
+        $stepMapper = resolve(StepMapper::class);
+
+        $eloquentGame = $gameRepository->generateStub([
+            'competitor_id' => $playerRepository->generateStub()->id,
+            'ended_at' => null,
         ]);
-        $eloquentStubStep = factory(EloquentStep::class)->make([
+        $eloquentStubStep = $stepRepository->generateStub([
             'game_id' => $eloquentGame->id,
             'user_id' => $eloquentGame->owner_id,
             'coordinate_x' => 0,
-            'coordinate_y' => 0
-        ]);
+            'coordinate_y' => 0,
+        ], false);
 
-        $game = resolve(GameRepository::class)->findById($eloquentGame->id);
-        $stubStep = resolve(StepMapper::class)->map($eloquentStubStep);
+        $game = $gameRepository->findById($eloquentGame->id);
+        $stubStep = $stepMapper->map($eloquentStubStep);
 
         $this->expectException(PlayerIsNotAbleToMakeAMoveException::class);
 
@@ -83,19 +141,28 @@ class MovementMakerServiceTest extends TestCase
 
     public function testMakeAMoveOwner()
     {
-        $eloquentGame = factory(EloquentGame::class)->create([
-            'competitor_id' => factory(EloquentUser::class)->create()->id,
-            'ended_at' => null
+        /** @var GameRepository $gameRepository */
+        $gameRepository = resolve(GameRepositoryInterface::class);
+        /** @var PlayerRepository $playerRepository */
+        $playerRepository = resolve(PlayerRepositoryInterface::class);
+        /** @var StepRepository $stepRepository */
+        $stepRepository = resolve(StepRepositoryInterface::class);
+        /** @var StepMapper $stepMapper */
+        $stepMapper = resolve(StepMapper::class);
+
+        $eloquentGame = $gameRepository->generateStub([
+            'competitor_id' => $playerRepository->generateStub()->id,
+            'ended_at' => null,
         ]);
-        $eloquentStubStep = factory(EloquentStep::class)->make([
+        $eloquentStubStep = $stepRepository->generateStub([
             'game_id' => $eloquentGame->id,
             'user_id' => $eloquentGame->owner_id,
             'coordinate_x' => 0,
-            'coordinate_y' => 0
-        ]);
+            'coordinate_y' => 0,
+        ], false);
 
-        $game = resolve(GameRepository::class)->findById($eloquentGame->id);
-        $stubStep = resolve(StepMapper::class)->map($eloquentStubStep);
+        $game = $gameRepository->findById($eloquentGame->id);
+        $stubStep = $stepMapper->map($eloquentStubStep);
 
         resolve(MovementMakerService::class)->makeAMove($game->getOwner(), $game, $stubStep);
 
@@ -105,26 +172,35 @@ class MovementMakerServiceTest extends TestCase
 
     public function testMakeAMoveCompetitor()
     {
-        $eloquentGame = factory(EloquentGame::class)->create([
-            'competitor_id' => factory(EloquentUser::class)->create()->id,
-            'ended_at' => null
+        /** @var GameRepository $gameRepository */
+        $gameRepository = resolve(GameRepositoryInterface::class);
+        /** @var PlayerRepository $playerRepository */
+        $playerRepository = resolve(PlayerRepositoryInterface::class);
+        /** @var StepRepository $stepRepository */
+        $stepRepository = resolve(StepRepositoryInterface::class);
+        /** @var StepMapper $stepMapper */
+        $stepMapper = resolve(StepMapper::class);
+
+        $eloquentGame = $gameRepository->generateStub([
+            'competitor_id' => $playerRepository->generateStub()->id,
+            'ended_at' => null,
         ]);
-        factory(EloquentStep::class)->create([
+        $stepRepository->generateStub([
             'game_id' => $eloquentGame->id,
             'user_id' => $eloquentGame->owner_id,
             'coordinate_x' => 0,
-            'coordinate_y' => 0
+            'coordinate_y' => 0,
         ]);
 
-        $eloquentStubStep = factory(EloquentStep::class)->make([
+        $eloquentStubStep = $stepRepository->generateStub([
             'game_id' => $eloquentGame->id,
             'user_id' => $eloquentGame->competitor_id,
             'coordinate_x' => 1,
-            'coordinate_y' => 1
-        ]);
+            'coordinate_y' => 1,
+        ], false);
 
-        $game = resolve(GameRepository::class)->findById($eloquentGame->id);
-        $stubStep = resolve(StepMapper::class)->map($eloquentStubStep);
+        $game = $gameRepository->findById($eloquentGame->id);
+        $stubStep = $stepMapper->map($eloquentStubStep);
 
         resolve(MovementMakerService::class)->makeAMove($game->getCompetitor(), $game, $stubStep);
 

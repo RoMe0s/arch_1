@@ -3,24 +3,36 @@
 namespace Game\Infrastructure\Repository\InMemory;
 
 use Game\Domain\Entity\Game;
-use Game\Domain\Repository\GameRepositoryInterface;
+use Game\Domain\Repository\{
+    GameRepositoryInterface,
+    PlayerRepositoryInterface,
+    StepRepositoryInterface
+};
 use Game\Infrastructure\Mapper\GameMapper;
-use Game\Infrastructure\Persistance\Eloquent\Game as EloquentGame;
+use Game\Infrastructure\Persistance\Eloquent\{
+    Game as EloquentGame,
+    User as EloquentUser
+};
 
-class GameRepository extends BaseRepository implements GameRepositoryInterface
+class GameRepository implements GameRepositoryInterface
 {
+    private $storage;
+
     private $mapper;
 
-    public function __construct(GameMapper $mapper)
+    public function __construct(InMemoryStorage $storage, GameMapper $mapper)
     {
-        parent::__construct();
+        $this->storage = $storage;
         $this->mapper = $mapper;
     }
 
     public function findById(string $id): ?Game
     {
-        $eloquentGame = $this->collection->get($id);
+        $eloquentGame = $this->storage->get(GameRepositoryInterface::class, $id);
+
         if ($eloquentGame) {
+            $this->loadRelations($eloquentGame);
+
             return $this->mapper->map($eloquentGame);
         }
         return null;
@@ -45,20 +57,46 @@ class GameRepository extends BaseRepository implements GameRepositoryInterface
             'ended_at' => $endedAt,
         ]);
 
-        $eloquentGame->setRelation('owner', $owner);
-        if ($competitor) {
-            $eloquentGame->setRelation('competitor', $competitor);
-        }
-
-        $this->collection->put($eloquentGame->id, $eloquentGame);
+        $this->storage->set(GameRepositoryInterface::class, $eloquentGame->id, $eloquentGame);
     }
 
-    public function generateStub(array $attributes = []): EloquentGame
+    public function generateStub(array $attributes = [], bool $saveToStorage = true): EloquentGame
     {
+        if (!key_exists('owner_id', $attributes)) {
+            $owner = factory(EloquentUser::class)->make();
+            $attributes['owner_id'] =  $owner->id;
+
+            $this->storage->set(PlayerRepositoryInterface::class, $owner->id, $owner);
+        }
+
         $eloquentGame = factory(EloquentGame::class)->make($attributes);
 
-        $this->collection->put($eloquentGame->id, $eloquentGame);
+        if ($saveToStorage) {
+            $this->storage->set(GameRepositoryInterface::class, $eloquentGame->id, $eloquentGame);
+        }
 
         return $eloquentGame;
+    }
+
+    private function loadRelations(EloquentGame $eloquentGame): void
+    {
+        $owner = $this->storage->all(PlayerRepositoryInterface::class)
+            ->firstWhere('id', $eloquentGame->owner_id);
+
+        $eloquentGame->setRelation('owner', $owner);
+
+        if ($eloquentGame->competitor_id) {
+            $competitor = $this->storage->all(PlayerRepositoryInterface::class)
+                ->firstWhere('id', $eloquentGame->competitor_id);
+
+            if ($competitor) {
+                $eloquentGame->setRelation('competitor', $competitor);
+            }
+        }
+
+        $steps = $this->storage->all(StepRepositoryInterface::class)
+            ->where('game_id', $eloquentGame->id);
+
+        $eloquentGame->setRelation('steps', $steps);
     }
 }

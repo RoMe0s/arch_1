@@ -2,16 +2,55 @@
 
 namespace Tests\Unit\Infrastructure\Service;
 
-use Game\Domain\Repository\GameRepositoryInterface;
-use Game\Infrastructure\Persistance\Eloquent\User;
-use Game\Domain\Exception\{GameNotFoundException, PlayerIsNotAPlayerOfThisGameException, PlayerNotFoundException};
+use Game\Domain\Repository\{
+    GameRepositoryInterface,
+    PlayerRepositoryInterface,
+    StepRepositoryInterface
+};
+use Game\Infrastructure\Repository\InMemory\{
+    GameRepository,
+    InMemoryStorage,
+    PlayerRepository,
+    StepRepository
+};
+use Game\Domain\Exception\{
+    GameNotFoundException,
+    PlayerIsNotAPlayerOfThisGameException,
+    PlayerNotFoundException
+};
 use Game\Infrastructure\DTO\NewStepDTO;
-use Game\Infrastructure\Persistance\Eloquent\Game;
 use Game\Infrastructure\Service\StepCreatorService;
 use Tests\TestCase;
 
 class StepCreatorServiceTest extends TestCase
 {
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->app->singleton(
+            InMemoryStorage::class,
+            function () {
+                return new InMemoryStorage();
+            }
+        );
+
+        $this->app->bind(
+            GameRepositoryInterface::class,
+            GameRepository::class
+        );
+
+        $this->app->bind(
+            StepRepositoryInterface::class,
+            StepRepository::class
+        );
+
+        $this->app->bind(
+            PlayerRepositoryInterface::class,
+            PlayerRepository::class
+        );
+    }
+
     public function testCreateStepForGameWrongGame()
     {
         $dto = new NewStepDTO(
@@ -28,7 +67,7 @@ class StepCreatorServiceTest extends TestCase
 
     public function testCreateStepForGameWrongNoExistingPlayer()
     {
-        $eloquentGame = factory(Game::class)->create();
+        $eloquentGame = resolve(GameRepositoryInterface::class)->generateStub();
         $dto = new NewStepDTO(
             $eloquentGame->id,
             'wrong-player-id',
@@ -43,8 +82,8 @@ class StepCreatorServiceTest extends TestCase
 
     public function testCreateStepForGameWrongExistingPlayer()
     {
-        $eloquentGame = factory(Game::class)->create();
-        $eloquentUser = factory(User::class)->create();
+        $eloquentGame = resolve(GameRepositoryInterface::class)->generateStub();
+        $eloquentUser = resolve(PlayerRepositoryInterface::class)->generateStub();
         $dto = new NewStepDTO(
             $eloquentGame->id,
             $eloquentUser->id,
@@ -59,8 +98,10 @@ class StepCreatorServiceTest extends TestCase
 
     public function testCreateStepForGame()
     {
-        $eloquentGame = factory(Game::class)->create([
-            'competitor_id' => factory(User::class)->create()->id,
+        /** @var GameRepositoryInterface $gameRepository */
+        $gameRepository = resolve(GameRepositoryInterface::class);
+        $eloquentGame = $gameRepository->generateStub([
+            'competitor_id' => resolve(PlayerRepositoryInterface::class)->generateStub()->id,
             'ended_at' => null,
         ]);
         $dto = new NewStepDTO(
@@ -72,7 +113,7 @@ class StepCreatorServiceTest extends TestCase
 
         resolve(StepCreatorService::class)->createStepForGame($dto);
 
-        $game = resolve(GameRepositoryInterface::class)->findById($eloquentGame->id);
+        $game = $gameRepository->findById($eloquentGame->id);
 
         $this->assertEquals(1, $game->getStepsCount());
     }
